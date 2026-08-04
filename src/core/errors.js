@@ -37,5 +37,9 @@ TapPayError.CODES = Object.freeze({
   INVALID_FIELDS: 'invalid_fields',
   GET_PRIME_FAILED: 'get_prime_failed',
   GOOGLE_PAY_UNAVAILABLE: 'google_pay_unavailable',
+  APPLE_PAY_UNAVAILABLE: 'apple_pay_unavailable',
+  SAMSUNG_PAY_UNAVAILABLE: 'samsung_pay_unavailable',
+  WALLET_UNAVAILABLE: 'wallet_unavailable',
+  REDIRECT_FAILED: 'redirect_failed',
   USER_CANCELLED: 'user_cancelled',
 });

@@ -205,3 +205,87 @@
 @keyframes tp-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
 
 .tp-hidden { display: none !important; }
+
+/* ---- Express Payments & Digital Wallets Grid ---- */
+.tp-express-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.tp-apple-pay-btn {
+  appearance: -webkit-apple-pay-button;
+  -webkit-appearance: -webkit-apple-pay-button;
+  -webkit-apple-pay-button-type: buy;
+  width: 100%;
+  height: 48px;
+  border-radius: var(--tp-radius-sm);
+  cursor: pointer;
+  border: 1px solid var(--tp-border);
+  background: var(--tp-text);
+  color: var(--tp-bg);
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+.tp-apple-pay-btn:hover { opacity: 0.9; }
+
+.tp-spay-mount {
+  min-height: 48px;
+  width: 100%;
+}
+
+.tp-wallets-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 8px;
+}
+
+.tp-wallet-btn {
+  appearance: none;
+  background: var(--tp-surface);
+  border: 1px solid var(--tp-border);
+  color: var(--tp-text);
+  border-radius: var(--tp-radius-sm);
+  padding: 10px 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  text-align: left;
+  line-height: 1.2;
+  overflow: hidden;
+}
+
+.tp-wallet-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--tp-surface) 85%, var(--tp-accent));
+  border-color: var(--tp-border-focus);
+  transform: translateY(-1px);
+}
+
+.tp-wallet-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.tp-wallet-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.tp-wallet-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.tp-wallet-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

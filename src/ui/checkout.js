@@ -1,16 +1,9 @@
-// Checkout — an opinionated, themeable UI that renders card fields and/or a
-// Google Pay button and returns a prime. It is a thin, optional convenience
-// layer on top of TapPayClient; if you want full control, use the payment
-// classes directly and skip this file.
-//
-// Render modes:
-//   - inline: mounts into a container you pass.
-//   - modal:  opens a centered popup overlay (dismissable).
-//
-// Theming: pass theme 'light' | 'dark' | 'auto'. The root carries
-// data-tp-theme so the CSS tokens in checkout.css take over.
+// Checkout — an opinionated, themeable UI that renders card fields, digital wallets,
+// and express checkout buttons (Google Pay, Apple Pay, Samsung Pay, JKO Pay, Line Pay, etc.)
+// and returns a prime token. It is a convenient abstraction over TapPayClient.
 
 import { TapPayError } from '../core/errors.js';
+import { WALLET_METADATA } from '../payments/wallet.js';
 
 const CURRENCY_SYMBOLS = { TWD: 'NT$', USD: '$', JPY: '¥', HKD: 'HK$', EUR: '€', GBP: '£' };
 
@@ -27,7 +20,10 @@ export class Checkout {
    * @param {string} [opts.payButtonText]  Defaults to "Pay {amount}".
    * @param {boolean} [opts.card=true]     Show Direct Pay card form.
    * @param {object|false} [opts.googlePay]  Google Pay options, or false to hide.
-   * @param {(res:{method:string,prime:string,card?:object})=>void} [opts.onPrime]
+   * @param {object|false} [opts.applePay]   Apple Pay options, or false to hide.
+   * @param {object|false} [opts.samsungPay] Samsung Pay options, or false to hide.
+   * @param {string[]|'all'|boolean} [opts.wallets] Array of wallet keys (e.g. ['linePay', 'jkoPay', 'aftee']), 'all', or false.
+   * @param {(res:{method:string,prime:string,card?:object,result?:object,redirect?:(url:string)=>void})=>void} [opts.onPrime]
    * @param {(err:TapPayError)=>void} [opts.onError]
    * @param {()=>void} [opts.onClose]
    */
@@ -40,19 +36,28 @@ export class Checkout {
       title: 'Payment',
       card: true,
       googlePay: false,
+      applePay: false,
+      samsungPay: false,
+      wallets: false,
       ...opts,
     };
     this._root = null;
     this._overlay = null;
     this._cardPayment = null;
     this._googlePayment = null;
+    this._applePayment = null;
+    this._samsungPayment = null;
     this._els = {};
   }
 
   /** Build DOM and mount payment methods. Returns this. */
   async mount() {
     const o = this._opts;
-    this._root = buildDom(o, this._els);
+    const walletKeys = o.wallets === true || o.wallets === 'all'
+      ? Object.keys(WALLET_METADATA)
+      : (Array.isArray(o.wallets) ? o.wallets : []);
+
+    this._root = buildDom(o, walletKeys, this._els);
     this._root.setAttribute('data-tp-theme', o.theme);
 
     if (o.mode === 'modal') {
@@ -79,6 +84,9 @@ export class Checkout {
 
     if (o.card) await this._mountCard();
     if (o.googlePay) await this._mountGooglePay();
+    if (o.applePay) await this._mountApplePay();
+    if (o.samsungPay) await this._mountSamsungPay();
+    if (walletKeys.length > 0) this._mountWallets(walletKeys);
     return this;
   }
 
@@ -110,7 +118,9 @@ export class Checkout {
       this._setError(e.message);
       this._opts.onError?.(e);
     } finally {
-      els.payBtn.disabled = !this._cardPayment.canGetPrime();
+      if (this._cardPayment) {
+        els.payBtn.disabled = !this._cardPayment.canGetPrime();
+      }
     }
   }
 
@@ -142,6 +152,90 @@ export class Checkout {
     }
   }
 
+  async _mountApplePay() {
+    const o = this._opts;
+    this._applePayment = this._client.applePay({
+      totalPrice: o.amount || '1',
+      currency: o.currency,
+      totalLabel: o.title || 'Total',
+      ...o.applePay,
+    });
+    try {
+      const available = await this._applePayment.init();
+      if (!available) {
+        this._els.applePayWrap?.classList.add('tp-hidden');
+        return;
+      }
+      if (this._els.applePayBtn) {
+        this._els.applePayBtn.addEventListener('click', async () => {
+          this._setError('');
+          try {
+            const { prime, result } = await this._applePayment.getPrime();
+            this._opts.onPrime?.({ method: 'apple-pay', prime, result });
+          } catch (err) {
+            const e = err instanceof TapPayError ? err : new TapPayError(String(err));
+            this._setError(e.message);
+            this._opts.onError?.(e);
+          }
+        });
+      }
+    } catch (err) {
+      this._els.applePayWrap?.classList.add('tp-hidden');
+    }
+  }
+
+  async _mountSamsungPay() {
+    const o = this._opts;
+    this._samsungPayment = this._client.samsungPay({
+      amount: o.amount || '1',
+      currency: o.currency,
+      merchantName: o.title || 'Merchant',
+      ...o.samsungPay,
+    });
+    try {
+      await this._samsungPayment.renderButton({
+        el: this._els.spayMount,
+        onPrime: (prime, result) => this._opts.onPrime?.({ method: 'samsung-pay', prime, result }),
+        onError: (err) => {
+          this._setError(err.message);
+          this._opts.onError?.(err);
+        },
+      });
+    } catch (err) {
+      this._els.spayWrap?.classList.add('tp-hidden');
+    }
+  }
+
+  _mountWallets(walletKeys) {
+    for (const key of walletKeys) {
+      const btn = this._els.walletBtns?.[key];
+      if (!btn) continue;
+      const wallet = this._client.wallet(key);
+      btn.addEventListener('click', async () => {
+        this._setError('');
+        btn.disabled = true;
+        const originalHtml = btn.innerHTML;
+        btn.innerHTML = '⌛ Connecting...';
+        try {
+          const { method, prime, result } = await wallet.getPrime();
+          this._opts.onPrime?.({
+            method: method,
+            prime: prime,
+            result: result,
+            redirect: (paymentUrl) => wallet.redirect(paymentUrl)
+          });
+        } catch (err) {
+          const e = err instanceof TapPayError ? err : new TapPayError(String(err));
+          this._setError(e.message);
+          this._opts.onError?.(e);
+        } finally {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      });
+    }
+  }
+
   _setError(msg) {
     if (this._els.error) this._els.error.textContent = msg || '';
   }
@@ -166,7 +260,7 @@ export class Checkout {
 
 // ---- DOM building helpers ----
 
-function buildDom(o, els) {
+function buildDom(o, walletKeys, els) {
   const root = document.createElement('div');
   root.className = 'tp-checkout';
 
@@ -187,11 +281,49 @@ function buildDom(o, els) {
   }
   card.appendChild(header);
 
-  if (o.googlePay) {
-    els.gpayWrap = el('div');
-    els.gpayMount = el('div', 'tp-gpay-mount');
-    els.gpayWrap.appendChild(els.gpayMount);
-    card.appendChild(els.gpayWrap);
+  const hasExpress = o.googlePay || o.applePay || o.samsungPay || walletKeys.length > 0;
+  if (hasExpress) {
+    const expressSection = el('div', 'tp-express-section');
+    
+    if (o.applePay) {
+      els.applePayWrap = el('div');
+      els.applePayBtn = el('button', 'tp-apple-pay-btn');
+      els.applePayBtn.type = 'button';
+      els.applePayBtn.innerHTML = ' Apple Pay';
+      els.applePayWrap.appendChild(els.applePayBtn);
+      expressSection.appendChild(els.applePayWrap);
+    }
+
+    if (o.googlePay) {
+      els.gpayWrap = el('div');
+      els.gpayMount = el('div', 'tp-gpay-mount');
+      els.gpayWrap.appendChild(els.gpayMount);
+      expressSection.appendChild(els.gpayWrap);
+    }
+
+    if (o.samsungPay) {
+      els.spayWrap = el('div');
+      els.spayMount = el('div', 'tp-spay-mount');
+      els.spayWrap.appendChild(els.spayMount);
+      expressSection.appendChild(els.spayWrap);
+    }
+
+    if (walletKeys.length > 0) {
+      const grid = el('div', 'tp-wallets-grid');
+      els.walletBtns = {};
+      for (const key of walletKeys) {
+        const meta = WALLET_METADATA[key] || { name: key, title: key, icon: '💳' };
+        const btn = el('button', 'tp-wallet-btn');
+        btn.type = 'button';
+        btn.innerHTML = `<span class="tp-wallet-icon">${meta.icon}</span> <span class="tp-wallet-label">${meta.title}</span>`;
+        grid.appendChild(btn);
+        els.walletBtns[key] = btn;
+      }
+      expressSection.appendChild(grid);
+    }
+
+    card.appendChild(expressSection);
+
     if (o.card) {
       const div = el('div', 'tp-divider');
       div.textContent = 'or pay by card';
@@ -232,7 +364,6 @@ function labelled(text, field) {
 
 function toggleField(fieldEl, statusCode) {
   if (!fieldEl) return;
-  // TapPay status: 0 = valid, 1 = invalid, 2 = empty, 3 = focused-partial.
   fieldEl.classList.toggle('tp-field--invalid', statusCode === 1);
 }
 

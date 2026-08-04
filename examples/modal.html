@@ -34,8 +34,15 @@
         title: 'Complete your purchase',
         card: true,
         googlePay: { merchantName: 'Demo Store' },
-        onPrime: ({ method, prime }) => {
-          alert(`Got ${method} prime:\n${prime}\n\nSend it to your server.`);
+        applePay: { merchantIdentifier: 'merchant.com.demo' },
+        samsungPay: { merchantName: 'Demo Store' },
+        wallets: ['linePay', 'jkoPay', 'easyWallet', 'piWallet', 'plusPay', 'aftee', 'virtualAccount'],
+        onPrime: ({ method, prime, redirect }) => {
+          let msg = `Got ${method} prime:\n${prime}\n\nSend it to your backend server.`;
+          if (redirect) {
+            msg += `\n(Upon receiving payment_url from server, invoke redirect(url) to complete wallet transaction.)`;
+          }
+          alert(msg);
           checkout.close();
         },
       });

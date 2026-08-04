@@ -43,9 +43,15 @@
       title: 'Order #1024',
       card: true,
       googlePay: { merchantName: 'Demo Store' },
-      onPrime: ({ method, prime }) => {
-        document.getElementById('out').textContent =
-          `✅ ${method} prime:\n${prime}\n\n→ POST this to your server's Pay-by-Prime endpoint.`;
+      applePay: { merchantIdentifier: 'merchant.com.demo' },
+      samsungPay: { merchantName: 'Demo Store' },
+      wallets: ['jkoPay', 'linePay', 'easyWallet', 'piWallet', 'plusPay', 'iPassMoney', 'pxPayPlus', 'aftee', 'virtualAccount'],
+      onPrime: ({ method, prime, redirect }) => {
+        let text = `✅ ${method} prime:\n${prime}\n\n→ POST this to your server's Pay-by-Prime endpoint.`;
+        if (redirect) {
+          text += `\n\n💡 Note: After your backend Pay-by-Prime call returns a payment_url, execute redirect(payment_url) to finalize auth.`;
+        }
+        document.getElementById('out').textContent = text;
       },
       onError: (err) => {
         document.getElementById('out').textContent = `❌ ${err.code}: ${err.message}`;

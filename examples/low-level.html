@@ -29,6 +29,12 @@
     <div><label>CCV</label><div class="field" id="card-ccv"></div></div>
   </div>
   <button id="pay" disabled>Get card prime</button>
+  
+  <h3 style="margin-top: 24px; color: #444;">Express & Regional Wallets (manual wiring)</h3>
+  <div class="row" style="margin-bottom: 16px;">
+    <button id="btn-linepay" style="background:#00c300; margin-top: 4px;">LINE Pay</button>
+    <button id="btn-jkopay" style="background:#e60012; margin-top: 4px;">JKO Pay</button>
+  </div>
   <pre id="out"></pre>
 
   <script type="module">
@@ -65,6 +71,21 @@
     } else {
       document.getElementById('gpay').textContent = '(Google Pay unavailable on this device)';
     }
+
+    // ---- Digital Wallets (manual wiring) ----
+    document.getElementById('btn-linepay').addEventListener('click', async () => {
+      try {
+        const { method, prime } = await client.linePay().getPrime();
+        out.textContent = `✅ ${method} prime:\n${prime}\n\n→ Send to server to get payment_url, then execute redirect(payment_url).`;
+      } catch (e) { out.textContent = e.code + ': ' + e.message; }
+    });
+
+    document.getElementById('btn-jkopay').addEventListener('click', async () => {
+      try {
+        const { method, prime } = await client.jkoPay().getPrime();
+        out.textContent = `✅ ${method} prime:\n${prime}\n\n→ Send to server to get payment_url, then execute redirect(payment_url).`;
+      } catch (e) { out.textContent = e.code + ': ' + e.message; }
+    });
   </script>
 </body>
 </html>
