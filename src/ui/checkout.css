@@ -1,0 +1,207 @@
+/*
+ * TapPay Web Module — checkout styles.
+ *
+ * Theming is driven entirely by CSS custom properties. Switch themes by
+ * setting `data-tp-theme="light" | "dark"` on the widget root (the module
+ * does this for you), or override any --tp-* token from your own stylesheet.
+ * The default is "auto": it follows prefers-color-scheme.
+ */
+
+.tp-checkout {
+  /* ---- Light theme tokens (default) ---- */
+  --tp-bg: #ffffff;
+  --tp-surface: #f6f7fb;
+  --tp-border: #e2e5ee;
+  --tp-border-focus: #0b5cff;
+  --tp-text: #1a1a2e;
+  --tp-text-muted: #6b7280;
+  --tp-field-color: #1a1a2e;
+  --tp-field-focus: #0b5cff;
+  --tp-field-valid: #16a34a;
+  --tp-field-invalid: #dc2626;
+  --tp-accent: #0b5cff;
+  --tp-accent-text: #ffffff;
+  --tp-danger: #dc2626;
+  --tp-radius: 12px;
+  --tp-radius-sm: 8px;
+  --tp-shadow: 0 8px 30px rgba(16, 24, 40, 0.12);
+  --tp-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "PingFang TC", sans-serif;
+
+  color: var(--tp-text);
+  font-family: var(--tp-font);
+  box-sizing: border-box;
+  max-width: 420px;
+  width: 100%;
+}
+.tp-checkout *,
+.tp-checkout *::before,
+.tp-checkout *::after { box-sizing: border-box; }
+
+/* ---- Dark theme ---- */
+.tp-checkout[data-tp-theme="dark"] {
+  --tp-bg: #14151a;
+  --tp-surface: #1e2029;
+  --tp-border: #2c2f3a;
+  --tp-border-focus: #5b8cff;
+  --tp-text: #f3f4f8;
+  --tp-text-muted: #9aa0ae;
+  --tp-field-color: #f3f4f8;
+  --tp-field-focus: #5b8cff;
+  --tp-field-valid: #4ade80;
+  --tp-field-invalid: #f87171;
+  --tp-accent: #5b8cff;
+  --tp-accent-text: #0b1020;
+  --tp-danger: #f87171;
+  --tp-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Auto: honour OS preference when the host hasn't pinned a theme. */
+@media (prefers-color-scheme: dark) {
+  .tp-checkout[data-tp-theme="auto"] {
+    --tp-bg: #14151a;
+    --tp-surface: #1e2029;
+    --tp-border: #2c2f3a;
+    --tp-border-focus: #5b8cff;
+    --tp-text: #f3f4f8;
+    --tp-text-muted: #9aa0ae;
+    --tp-field-color: #f3f4f8;
+    --tp-field-focus: #5b8cff;
+    --tp-field-valid: #4ade80;
+    --tp-field-invalid: #f87171;
+    --tp-accent: #5b8cff;
+    --tp-accent-text: #0b1020;
+    --tp-danger: #f87171;
+    --tp-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+  }
+}
+
+.tp-card {
+  background: var(--tp-bg);
+  border: 1px solid var(--tp-border);
+  border-radius: var(--tp-radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.tp-row { display: flex; gap: 12px; }
+.tp-row > * { flex: 1; }
+
+.tp-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--tp-text-muted);
+}
+
+/* The mount point that TapPay injects its iframe into. */
+.tp-field {
+  height: 44px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  background: var(--tp-surface);
+  border: 1px solid var(--tp-border);
+  border-radius: var(--tp-radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.tp-field.tp-field--focus {
+  border-color: var(--tp-border-focus);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--tp-border-focus) 20%, transparent);
+}
+.tp-field.tp-field--invalid { border-color: var(--tp-danger); }
+.tp-field > * { width: 100%; }
+
+.tp-pay-btn {
+  appearance: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  height: 48px;
+  border-radius: var(--tp-radius-sm);
+  background: var(--tp-accent);
+  color: var(--tp-accent-text);
+  font-size: 16px;
+  font-weight: 700;
+  font-family: inherit;
+  transition: filter 0.15s ease, opacity 0.15s ease;
+}
+.tp-pay-btn:hover:not(:disabled) { filter: brightness(1.05); }
+.tp-pay-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.tp-gpay-mount { min-height: 48px; }
+
+.tp-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--tp-text-muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.tp-divider::before,
+.tp-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--tp-border);
+}
+
+.tp-error {
+  color: var(--tp-danger);
+  font-size: 13px;
+  min-height: 18px;
+  margin: 0;
+}
+.tp-amount {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+.tp-amount small { font-size: 13px; font-weight: 600; color: var(--tp-text-muted); }
+
+/* ---- Modal / popup mode ---- */
+.tp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: rgba(8, 10, 20, 0.55);
+  backdrop-filter: blur(2px);
+  animation: tp-fade 0.15s ease;
+}
+.tp-modal {
+  position: relative;
+  max-width: 440px;
+  width: 100%;
+  border-radius: var(--tp-radius);
+  box-shadow: var(--tp-shadow);
+  animation: tp-pop 0.18s ease;
+}
+.tp-modal .tp-card { border: none; }
+.tp-modal-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: var(--tp-surface);
+  color: var(--tp-text-muted);
+  font-size: 18px;
+  line-height: 1;
+}
+.tp-modal-title { margin: 0; font-size: 18px; font-weight: 700; }
+
+@keyframes tp-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tp-pop { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: none; } }
+
+.tp-hidden { display: none !important; }

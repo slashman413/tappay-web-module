@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TapPay Web Module — Popup Checkout</title>
+  <link rel="stylesheet" href="../src/ui/checkout.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh;
+           display: grid; place-items: center; background: #0b0d12; }
+    .buy { border: none; background: #0b5cff; color: #fff; padding: 14px 28px;
+           border-radius: 10px; cursor: pointer; font-size: 16px; font-weight: 700; }
+  </style>
+</head>
+<body>
+  <button class="buy" id="buy">Buy now — NT$990</button>
+
+  <script type="module">
+    import { createTapPay, Checkout } from '../src/index.js';
+
+    const client = createTapPay({
+      appId: 159881,
+      appKey: 'app_wh614Aq3T392m8Nu2xEP5Nc0Yq6oMfN7ky4y9GkkjZi3lFDkFC9Kb0nyDcWz',
+      serverType: 'sandbox',
+    });
+
+    document.getElementById('buy').addEventListener('click', () => {
+      // Popup / modal mode — the widget renders itself in a dismissable overlay.
+      const checkout = new Checkout(client, {
+        theme: 'dark',
+        mode: 'modal',
+        amount: 990,
+        currency: 'TWD',
+        title: 'Complete your purchase',
+        card: true,
+        googlePay: { merchantName: 'Demo Store' },
+        onPrime: ({ method, prime }) => {
+          alert(`Got ${method} prime:\n${prime}\n\nSend it to your server.`);
+          checkout.close();
+        },
+      });
+      checkout.mount();
+    });
+  </script>
+</body>
+</html>

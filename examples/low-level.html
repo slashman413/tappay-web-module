@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TapPay Web Module — Low-level API (bring your own UI)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 420px; margin: 40px auto; padding: 0 16px; }
+    .field { height: 44px; border: 1px solid #ccc; border-radius: 8px; padding: 0 12px;
+             display: flex; align-items: center; margin: 8px 0; }
+    .row { display: flex; gap: 12px; }
+    .row > div { flex: 1; }
+    button { width: 100%; height: 46px; border: none; border-radius: 8px; background: #0b5cff;
+             color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 12px; }
+    button:disabled { opacity: .5; }
+    #gpay { min-height: 48px; margin: 12px 0; }
+    pre { white-space: pre-wrap; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <h2>Direct Pay + Google Pay (manual wiring)</h2>
+
+  <div id="gpay"></div>
+
+  <label>Card number</label>
+  <div class="field" id="card-number"></div>
+  <div class="row">
+    <div><label>Expiry</label><div class="field" id="card-exp"></div></div>
+    <div><label>CCV</label><div class="field" id="card-ccv"></div></div>
+  </div>
+  <button id="pay" disabled>Get card prime</button>
+  <pre id="out"></pre>
+
+  <script type="module">
+    import { createTapPay } from '../src/index.js';
+
+    const out = document.getElementById('out');
+    const client = createTapPay({
+      appId: 159881,
+      appKey: 'app_wh614Aq3T392m8Nu2xEP5Nc0Yq6oMfN7ky4y9GkkjZi3lFDkFC9Kb0nyDcWz',
+      serverType: 'sandbox',
+    });
+
+    // ---- Direct Pay ----
+    const card = client.card({
+      fields: { number: '#card-number', expirationDate: '#card-exp', ccv: '#card-ccv' },
+    });
+    card.on('statuschange', (u) => { document.getElementById('pay').disabled = !u.canGetPrime; });
+    await card.mount();
+    document.getElementById('pay').addEventListener('click', async () => {
+      try {
+        const { prime } = await card.getPrime();
+        out.textContent = 'Card prime: ' + prime;
+      } catch (e) { out.textContent = e.code + ': ' + e.message; }
+    });
+
+    // ---- Google Pay ----
+    const gpay = client.googlePay({ merchantName: 'Demo Store', price: 300, currency: 'TWD' });
+    if (await gpay.init()) {
+      await gpay.renderButton({
+        el: '#gpay',
+        onPrime: (prime) => { out.textContent = 'Google Pay prime: ' + prime; },
+        onError: (e) => { out.textContent = e.message; },
+      });
+    } else {
+      document.getElementById('gpay').textContent = '(Google Pay unavailable on this device)';
+    }
+  </script>
+</body>
+</html>

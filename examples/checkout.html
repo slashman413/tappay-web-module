@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TapPay Web Module — Drop-in Checkout</title>
+  <!-- The Checkout UI stylesheet (theming lives here) -->
+  <link rel="stylesheet" href="../src/ui/checkout.css" />
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; min-height: 100vh;
+           display: grid; place-items: center; background: #eef1f7; transition: background .2s; }
+    body.dark { background: #0b0d12; color: #fff; }
+    .wrap { display: flex; flex-direction: column; gap: 16px; align-items: center; }
+    .toggle { border: none; background: #0b5cff; color: #fff; padding: 8px 16px;
+              border-radius: 8px; cursor: pointer; font-weight: 600; }
+    pre { font-size: 12px; max-width: 420px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <button class="toggle" id="theme">Toggle dark / light</button>
+    <div id="checkout"></div>
+    <pre id="out"></pre>
+  </div>
+
+  <script type="module">
+    import { createTapPay, Checkout } from '../src/index.js';
+
+    // TapPay's public sandbox test credentials (from tappay-web-example).
+    const client = createTapPay({
+      appId: 159881,
+      appKey: 'app_wh614Aq3T392m8Nu2xEP5Nc0Yq6oMfN7ky4y9GkkjZi3lFDkFC9Kb0nyDcWz',
+      serverType: 'sandbox',
+    });
+
+    let theme = 'auto';
+    const checkout = new Checkout(client, {
+      theme,
+      mode: 'inline',
+      container: '#checkout',
+      amount: 1280,
+      currency: 'TWD',
+      title: 'Order #1024',
+      card: true,
+      googlePay: { merchantName: 'Demo Store' },
+      onPrime: ({ method, prime }) => {
+        document.getElementById('out').textContent =
+          `✅ ${method} prime:\n${prime}\n\n→ POST this to your server's Pay-by-Prime endpoint.`;
+      },
+      onError: (err) => {
+        document.getElementById('out').textContent = `❌ ${err.code}: ${err.message}`;
+      },
+    });
+    checkout.mount();
+
+    document.getElementById('theme').addEventListener('click', () => {
+      theme = theme === 'dark' ? 'light' : 'dark';
+      document.body.classList.toggle('dark', theme === 'dark');
+      checkout.setTheme(theme);
+    });
+  </script>
+</body>
+</html>

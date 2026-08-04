@@ -1,0 +1,53 @@
+{
+  "name": "tappay-web-module",
+  "version": "1.0.0",
+  "description": "A well-structured, zero-dependency, themeable web module that wraps the TapPay TPDirect SDK (Direct Pay credit card + Google Pay on the Web) with a drop-in dark/light checkout UI.",
+  "type": "module",
+  "main": "src/index.js",
+  "module": "src/index.js",
+  "types": "types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    },
+    "./style.css": "./src/ui/checkout.css",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "src",
+    "types",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
+  "scripts": {
+    "dev": "npx -y serve .",
+    "example": "npx -y serve examples"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slashman413/tappay-web-module.git"
+  },
+  "keywords": [
+    "tappay",
+    "tpdirect",
+    "payment",
+    "google-pay",
+    "direct-pay",
+    "credit-card",
+    "checkout",
+    "sdk",
+    "modal",
+    "dark-mode",
+    "taiwan"
+  ],
+  "author": "slashman413",
+  "license": "MIT",
+  "homepage": "https://github.com/slashman413/tappay-web-module#readme",
+  "bugs": {
+    "url": "https://github.com/slashman413/tappay-web-module/issues"
+  }
+}
