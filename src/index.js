@@ -16,4 +16,4 @@ export { Checkout } from './ui/checkout.js';
 export { TapPayError } from './core/errors.js';
 export { loadTapPaySDK } from './core/loader.js';
 
-export const VERSION = '1.0.0';
+export const VERSION = '1.1.0';

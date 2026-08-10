@@ -24,8 +24,13 @@
     "*.css"
   ],
   "scripts": {
+    "test": "node --test",
     "dev": "npx -y serve .",
-    "example": "npx -y serve examples"
+    "example": "npx -y serve examples",
+    "prepack": "npm test"
+  },
+  "engines": {
+    "node": ">=16"
   },
   "repository": {
     "type": "git",
@@ -33,6 +38,8 @@
   },
   "keywords": [
     "tappay",
+    "taiwan",
+    "payments",
     "tpdirect",
     "payment",
     "google-pay",

@@ -1,5 +1,9 @@
 # tappay-web-module
 
+[![npm version](https://img.shields.io/npm/v/tappay-web-module)](https://www.npmjs.com/package/tappay-web-module)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Docs](https://img.shields.io/badge/docs-GitHub%20Pages-8A2BE2)](https://slashman413.github.io/tappay-web-module/)
+
 A **well-structured, zero-dependency, themeable** web module that wraps the [TapPay **TPDirect** SDK](https://docs.tappaysdk.com/) to empower modern web applications with unified access to **all 18 TapPay payment methods** — including Direct Pay credit cards, mobile wallets (Apple Pay, Google Pay, Samsung Pay), regional Asian e-wallets (LINE Pay, JKO Pay, Easy Wallet), Buy-Now-Pay-Later (AFTEE, Pay Later), and bank/logistics rails.
 
 Featuring a high-performance, drop-in **Dark/Light checkout UI** with glassmorphism and smooth micro-animations, or a promise-based **Low-level Hexagonal Adapter API** for completely customized frontend integrations.
@@ -139,8 +143,11 @@ Following rigorous **Software Architecture & Domain-Driven Design (DDD)** princi
 
 ### Option A — Package Managers (Vite, Next.js, Webpack)
 ```bash
-npm install github:slashman413/tappay-web-module
+npm install tappay-web-module
 ```
+
+> Before the first npm release lands, install straight from GitHub:
+> `npm install github:slashman413/tappay-web-module`
 
 ```javascript
 import { createTapPay, Checkout } from 'tappay-web-module';
@@ -477,6 +484,14 @@ This launches a development static server on `http://localhost:3000`. Available 
 - `http://localhost:3000/checkout.html`: Responsive inline drop-in checkout with instant theme toggle and full wallet grid.
 - `http://localhost:3000/modal.html`: Glassmorphic modal popup checkout experience.
 - `http://localhost:3000/low-level.html`: Manual low-level adapter wiring for cards, Google Pay, LINE Pay, and JKO Pay.
+
+Framework integration examples live in [`examples/`](examples/) (React component, Vue 3 component, Node/Express Pay-by-Prime server) — see [`examples/README.md`](examples/README.md).
+
+Run the unit suite (zero dependencies, `node:test`):
+
+```bash
+npm test
+```
 
 ### Sandbox Test Card Credentials:
 - **Card Number:** `4242 4242 4242 4242` (or any standard Visa/Mastercard test sequences)
