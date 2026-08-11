@@ -1,6 +1,8 @@
 # Publishing Strategy — tappay-web-module
 
-Status: **first publish pending npm credential fix** (see §1).
+Status: **PUBLISHED 2026-08-11 — `tappay-web-module@1.1.0`** (first publish via
+one-time OTP, §2A). Remaining action: §3 trusted-publishing setup (one-time,
+npm web UI) so future releases publish tokenlessly from GitHub Actions.
 This file is the living strategy for how this package reaches npm and stays
 publishable as npm tightens its security model.
 

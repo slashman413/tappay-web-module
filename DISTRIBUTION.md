@@ -142,7 +142,10 @@ app.listen(3000);
 
 ## 4. Adoption checklist
 
-1. Publish to npm (see PUBLISHING.md) — blocked on credential fix.
+1. ~~Publish to npm~~ **DONE 2026-08-11: `tappay-web-module@1.1.0` live at
+   https://www.npmjs.com/package/tappay-web-module** (published via one-time
+   OTP per PUBLISHING.md §2A). Durable path: trusted publishing (OIDC) — do
+   PUBLISHING.md §3 setup once, then tag-push releases tokenlessly.
 2. Post Show HN (US morning ~7-9am PT) + same-day PTT Soft_Job + iT 邦幫忙.
 3. Reply to every comment; collect "production blocker" issues into the repo.
 4. Add a `CONTRIBUTING.md` + issue templates next sprint (community needs a
