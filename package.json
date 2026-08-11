@@ -23,6 +23,9 @@
   "sideEffects": [
     "*.css"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "node --test",
     "dev": "npx -y serve .",

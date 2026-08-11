@@ -1,0 +1,57 @@
+# npm publish via Trusted Publishing (OIDC) + provenance.
+#
+# This is the durable publishing path. npm is deprecating 2FA-bypass granular
+# access tokens (GitHub changelogs 2026-07-08 / 2026-07-31): bypass-2FA GATs
+# lose direct publish around January 2027, after which long-lived publish
+# tokens are gone. Trusted publishing lets GitHub Actions mint a short-lived
+# npm identity via OIDC — no token in secrets, ever.
+#
+# ONE-TIME SETUP (npm web UI, ~1 minute, needs interactive 2FA):
+#   1. The package must already exist on npm (published once via token/OTP).
+#   2. npmjs.com -> package "tappay-web-module" -> Settings -> Access ->
+#      "Trusted Publishing" -> "Add GitHub repository":
+#        GitHub repo:    slashman413/tappay-web-module
+#        Workflow name:  publish.yml
+#   3. Done. From now on every `v*` tag (or manual run) publishes
+#      tokenlessly with SLSA provenance.
+#
+# Until trusted publishing is configured, publish manually from a clone:
+#   npm publish   # requires a bypass-2FA GAT or `--otp=<code>`
+# See PUBLISHING.md for the full migration plan.
+
+name: publish
+
+on:
+  workflow_dispatch:        # manual: "Run workflow" button
+  push:
+    tags: ['v*']            # tag a release -> publish
+
+permissions:
+  contents: read
+  id-token: write           # REQUIRED for npm OIDC trusted publishing
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Verify tag matches package version
+        run: |
+          TAG="${GITHUB_REF_NAME#v}"
+          PKG="$(node -p "require('./package.json').version")"
+          if [ -n "$GITHUB_REF_NAME" ] && [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag v${TAG} does not match package.json version ${PKG}"
+            exit 1
+          fi
+
+      - name: Test
+        run: npm test
+
+      - name: Publish to npm (OIDC + provenance)
+        run: npm publish --provenance --access public
