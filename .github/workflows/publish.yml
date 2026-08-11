@@ -45,7 +45,8 @@ jobs:
         run: |
           TAG="${GITHUB_REF_NAME#v}"
           PKG="$(node -p "require('./package.json').version")"
-          if [ -n "$GITHUB_REF_NAME" ] && [ "$TAG" != "$PKG" ]; then
+          # Only enforce on tag pushes; manual dispatch (branch ref) must not fail
+          if [ "$GITHUB_REF_TYPE" = "tag" ] && [ "$TAG" != "$PKG" ]; then
             echo "::error::tag v${TAG} does not match package.json version ${PKG}"
             exit 1
           fi
